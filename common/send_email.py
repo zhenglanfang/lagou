@@ -14,13 +14,13 @@ class SendEmail(object):
 
     # 登录账户和口令 目标服务器网站
     # from_addr = '1003594835@qq.com'
-    # password = 'xvquoiounjzpbcha'
+    # password = '**********'
     # smtp_server = 'smtp.qq.com'
 
-    # 163账号和口令
-    from_addr = '13849182150@163.com'
-    password = 'lanfang123'
-    smtp_server = 'smtp.163.com'
+    # 126账号和口令
+    from_addr = 'zlf13849182150@126.com'
+    password = 'zlf123'
+    smtp_server = 'smtp.126.com'
 
     server = None
 
