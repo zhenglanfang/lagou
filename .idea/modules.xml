@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/lagou.iml" filepath="$PROJECT_DIR$/.idea/lagou.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lagou_spider/.idea/lagou_spider.iml" filepath="$PROJECT_DIR$/lagou_spider/.idea/lagou_spider.iml" />
     </modules>
   </component>
 </project>

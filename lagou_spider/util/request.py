@@ -3,11 +3,15 @@
 '''
 作用：对post和get请求进行封装
 '''
+import sys
+sys.path.append('/Users/mrs/Desktop/project/mytest/lagou')
 
 import requests
 import random
 import urllib
 import time
+
+from lagou_spider.util import log
 
 # User-Agent：列表
 ua_list = [
@@ -36,7 +40,7 @@ def get(url, session=None, params=None, headers={}, timeout=5,timeout_retry=5, *
     :return: 响应对象
     '''
     if not url:
-        print ('GetError url not exit')
+        log.logger.error('GetError url not exit')
         return None
     # print(str(cookies)+'before---')
     if kwargs.get('cookies',None):
@@ -53,7 +57,7 @@ def get(url, session=None, params=None, headers={}, timeout=5,timeout_retry=5, *
         else:
             response = requests.get(url, params=params, headers=headers, timeout=timeout,verify=False,**kwargs)
     except Exception as e:
-        print ('GetExcept %s' % e.message)
+        log.logger.warning('GetExcept %s' % e.message)
         if timeout_retry > 0:
             htmlCode = get(url=url,session=session,params=params,headers=headers, timeout=timeout,timeout_retry=(timeout_retry-1), **kwargs)
         else:
@@ -67,9 +71,10 @@ def get(url, session=None, params=None, headers={}, timeout=5,timeout_retry=5, *
         request_url = url
         if params:
             request_url = '%s?%s'%(url,urllib.urlencode(params))
-        print ('Get %s %s' % (response.status_code, request_url))
+        log.logger.info('Get %s %s' % (response.status_code, request_url))
 
     return htmlCode
+
 
 def post(url, session=None,data=None,headers={}, timeout=5,timeout_retry=5,**kwargs):
     '''
@@ -100,7 +105,7 @@ def post(url, session=None,data=None,headers={}, timeout=5,timeout_retry=5,**kwa
         else:
             response = requests.post(url, data=data, headers=headers, timeout=timeout, verify=False,**kwargs)
     except Exception as e:
-        print ('PostExcept %s' % e.message)
+        log.logger.warning('PostExcept %s' % e.message)
         if timeout_retry > 0:
             htmlCode = post(url=url,session=session,data=data,headers=headers, timeout=timeout,timeout_retry=(timeout_retry-1), **kwargs)
         else:
@@ -111,6 +116,6 @@ def post(url, session=None,data=None,headers={}, timeout=5,timeout_retry=5,**kwa
             htmlCode = response
         else:
             htmlCode = None
-        print ('Post %s %s data:%s' % (response.status_code, url , data))
+        log.logger.info('Post %s %s data:%s' % (response.status_code, url , data))
 
     return htmlCode

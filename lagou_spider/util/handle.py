@@ -69,8 +69,8 @@ def getNoHtmlBody(content):
         # dr = re.compile(r'<[^>]+>', re.S)
         dr = re.compile(r'</?\w+[^>]*>', re.S)
         body = dr.sub('', content)
-    except Exception, ex:
-        print (ex.message)
+    except Exception as ex:
+        print (ex)
     return body
 
 def test():
@@ -80,8 +80,8 @@ def test():
     #print get_datetime('1509368593')
     # print time.mktime(time.strptime('2017-10-28 0:0:0', '%Y-%m-%d %H:%M:%S'))
     # print compare_datetime('2017-10-29 19:12:1')
-    print compare_datetime('2018-1-2 23:12:1')
-    print compare_datetime('2018-1-1')
+    print(compare_datetime('2018-1-2 23:12:1'))
+    print(compare_datetime('2018-1-1'))
     
 
 if __name__ == '__main__':

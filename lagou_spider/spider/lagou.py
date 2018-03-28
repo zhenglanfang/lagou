@@ -2,22 +2,21 @@
 # coding=utf-8
 
 import sys
-sys.path.append('/Users/mrs/Desktop/project/mytest/lagou/lagou_spider')
+sys.path.append('/Users/mrs/Desktop/project/mytest/lagou')
 
 import datetime
 from lxml import etree
-from database import db_operate
-from util import request
-from spider.base import LagouBase
+from lagou_spider.util import request
+from lagou_spider.spider.base import LagouBase
 
 start_url = 'https://www.lagou.com/'
 second_url = 'https://www.lagou.com/jobs/list_%s?px=default&city=全国#order'
 
 
 class AllLagou(LagouBase):
-    '''
+    """
         定期整站爬取
-    '''
+    """
 
     def __init__(self):
         super(AllLagou, self).__init__()
@@ -25,12 +24,13 @@ class AllLagou(LagouBase):
     # 获取职位列表页
     def get_positons_list(self, url, item, cookies):
         response = request.get(url, cookies=cookies)
+        self.request_count += 1
         cookies = response.cookies
         if response:
             html = etree.HTML(response.content)
             title = html.xpath('//title/text()')
             if not title or title[0] == '找工作-互联网招聘求职网-拉勾网':
-                print(url + '  error ')
+                self.logger.error(url + '  error ')
                 return
             self.get_positions_urls(response, item, cookies)
             html = etree.HTML(response.content)
@@ -41,19 +41,23 @@ class AllLagou(LagouBase):
                     list_url = '%s%d/' % (url, num)
                     response = request.get(list_url, cookies=cookies)
                     self.get_positions_urls(response, item, response.cookies)
+        else:
+            self.except_count += 1
 
     # 获取列表页的urls
     def get_positions_urls(self, response, item, cookies):
+        self.request_count += 1
         if response:
             html = etree.HTML(response.content)
-            print(html.xpath('//title/text()')[0] if html.xpath('//title/text()') else 'title error')
+            self.logger.info(html.xpath('//title/text()')[0] if html.xpath('//title/text()') else 'title error')
             item_list = html.xpath("//ul[@class='item_con_list']/li")
             for position in item_list:
                 publish_date = position.xpath(".//span[@class='format-time']/text()")[0]
                 publish_date = self.switch_publish_date(publish_date)
                 url = position.xpath(".//a[@class='position_link']/@href")[0]
                 # 判断url是否存在
-                if not db_operate.isexist_url(url):
+                if url not in self.urls and not self.lagou_db.isexist_url(url):
+                    self.urls.append(url)
                     position_name = position.xpath("@data-positionname")[0]
                     salary = position.xpath("@data-salary")[0]
                     other = position.xpath(".//div[@class='li_b_l']/text()")[2].strip()
@@ -71,13 +75,16 @@ class AllLagou(LagouBase):
                     response = request.get(url, cookies=cookies)
                     self.get_position_detail(response, item)
                 else:
-                    print('此url %s 已经存在！' % url)
+                    self.logger.debug('此url %s 已经存在！' % url)
+        else:
+            self.except_count += 1
 
     # 获取详情页的数据
     def get_position_detail(self, response, position):
+        self.request_count += 1
         if response:
             html = etree.HTML(response.content)
-            print(html.xpath('//title/text()')[0] if html.xpath('//title/text()') else 'title error ')
+            self.logger.info(html.xpath('//title/text()')[0] if html.xpath('//title/text()') else 'title error ')
             # education = html.xpath("//dd[@class='job_request']/p[1]/span[4]/text()")
             # work_year = html.xpath("//dd[@class='job_request']/p[1]/span[3]/text()")
             job_nature = html.xpath("//dd[@class='job_request']/p[1]/span[5]/text()")
@@ -96,16 +103,18 @@ class AllLagou(LagouBase):
             position['job_detail'] = job_detail
             position['job_address'] = job_address
             position['district'] = district
+        else:
+            self.except_count += 1
         self.save_infos(position)
 
     # 转换时间
     @staticmethod
     def switch_publish_date(publish_date):
-        '''
+        """
         处理发布时间
         :param publish_date:
         :return:
-        '''
+        """
         if publish_date.endswith('发布'):
             today = datetime.date.today()
             if publish_date.find(':') == -1:

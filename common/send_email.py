@@ -10,6 +10,7 @@ from email.mime.multipart import MIMEBase, MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import parseaddr, formataddr
 
+
 class SendEmail(object):
 
     # 登录账户和口令 目标服务器网站
@@ -26,19 +27,6 @@ class SendEmail(object):
 
     def __init__(self, from_name):
         self.from_name = from_name
-        self.create_server()
-
-    def create_server(self):
-        """创建服务器"""
-        if self.server:
-            return self.server
-        server = smtplib.SMTP_SSL(self.smtp_server, 465)
-        # 打印出和SMTP服务器所有的交互信息
-        # server.set_debuglevel(1)
-        # 登录服务器
-        server.login(self.from_addr, self.password)
-        self.server = server
-        return server
 
     def _format_addr(self, addrs):
         """
@@ -69,15 +57,18 @@ class SendEmail(object):
         msg_obj['Subject'] = Header(subject_test, 'utf-8').encode()
         to_addrs = [item[1] for item in to_users]
         try:
+            server = smtplib.SMTP_SSL(self.smtp_server, 465)
+            server.login(self.from_addr, self.password)
             # 发件账户，收件账户，内容
-            result = self.server.sendmail(self.from_addr, to_addrs, msg_obj.as_string())
+            result = server.sendmail(self.from_addr, to_addrs, msg_obj.as_string())
+            server.quit()
             return result
         except smtplib.SMTPRecipientsRefused as e:
             print(e)
             return json.loads(json.dumps(e.message))
         except smtplib.SMTPException as e:
             print('Send Fail,%s' % e)
-            return e.message
+            return str(e)
 
     def send_email_text(self, to_addrs, msg, subject_test='来自SMTP的问候'):
         """
@@ -148,17 +139,14 @@ class SendEmail(object):
             msg.attach(mime)
         return self.send_email_base(to_addrs, msg, subject_test)
 
-    def __del__(self):
-        # 退出服务器
-        if self.server:
-            self.server.quit()
+
 
 
 if __name__ == '__main__':
     html_str = '<html><body><h1>Hello</h1><p>send by ' \
                '<a href="http://www.python.org">Python</a>' \
                '...</p></body></html>'
-    to_addrs = [('lanfang','13849182150@163.com'),('lanfang','138491821@163.com')]
+    to_addrs = [('lanfang','13849182150@163.com'), ('lanfang','138491821@163.com')]
     send_obj = SendEmail(from_name='python')
     send_obj.send_email_text(to_addrs,'hello~~~~')
     # send_obj.send_email_image(to_addrs,'hello~~~~','/Users/mrs/Documents/test.jpg')

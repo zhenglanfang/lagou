@@ -1,29 +1,27 @@
 #! /usr/bin/python
 # coding=utf-8
 
+import os
+import logging
+
 # mysql 数据库
-class DB():
-    MYSQL_PROD = "mysql+pymysql://root:root@127.0.0.1:3306/lagou?charset=utf8"
+MYSQL_PROD = "mysql+pymysql://root:root@127.0.0.1:3306/lagou?charset=utf8"
+
+# 日志
+log_level = logging.INFO
+log_name = 'lagou_spider'
+log_path = os.path.join(os.path.dirname(__file__), 'log/lagou_spider.log')
+
+# 调试模式
+debug = True
+
+# 邮件
+from_name = '拉钩网数据爬取中心'
+to_addrs = [('我', '13849182150@163.com')]
 
 
-'''
-	数据库：
-		position_name       # 职位名称
-        publish_date        # 发布时间
-        education           # 学历
-        work_year           # 工作经验
-        job_nature          # 工作性质
-        job_detail          # 职位描述
-        salary              # 薪资
-        city                # 城市
-        district            # 地区
-        job_address         # 工作地址
-        company_name        # 公司名称
-        first_type          # 职位类型
-        second_type         # 职位类型
-        url                 # 职位链接
 
-'''
+
 
 
 

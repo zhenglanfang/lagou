@@ -9,16 +9,15 @@ import time
 import random
 
 from lxml import etree
-from database import db_operate
-from util import request
-from util import handle
-from spider.base import LagouBase
+from lagou_spider.util import request
+from lagou_spider.util import handle
+from base import LagouBase
 
-form_data = {
-    'first':'false',
-    'pn':'3',
-    'kd':'ios',
-}
+# form_data = {
+#     'first':'false',
+#     'pn':'3',
+#     'kd':'ios',
+# }
 
 
 class RealTime(LagouBase):
@@ -34,12 +33,14 @@ class RealTime(LagouBase):
 
     # 获取职位列表页
     def get_positons_list(self, url, item, cookies):
+        self.request_count += 1
         response = request.get(url, cookies=cookies)
         cookies = response.cookies
         self.get_new_list(response, item, cookies)
 
     # 获取最新的职位列表
     def get_new_list(self, response, item, cookies):
+        self.request_count += 1
         if response:
             # new_url = html.xpath("//div[@class='item order']/a[2]/@href")
             new_url = self.second_url % (item['first_type'])
@@ -65,7 +66,7 @@ class RealTime(LagouBase):
                         try:
                             result = response.json(encoding='utf-8')
                         except Exception as e:
-                            print(e.message)
+                            self.logger.error(e.message)
                         else:
                             if result.get('success'):
                                 result = self.get_positions_urls(result, item, cookies=response.cookies)
@@ -73,7 +74,9 @@ class RealTime(LagouBase):
                                     return
                                 break
                             else:
-                                print('%s %s %s' % (self.post_url, form_data, response.text))
+                                self.logger.error('%s %s %s' % (self.post_url, form_data, response.text))
+            else:
+                self.except_count += 1
 
     # 获取列表页的urls
     def get_positions_urls(self, result, item, cookies):
@@ -85,12 +88,13 @@ class RealTime(LagouBase):
                     publish_date = position['createTime'].split(' ')[0]
                     # 判断是否是当天发布
                     if not handle.compare_datetime(publish_date):
-                        print('已不是当天：%s' % position['createTime'])
+                        self.logger.info('已不是当天：%s' % position['createTime'])
                         return False
                     url = self.job_url % position['positionId']
-                    if db_operate.isexist_url(url):
-                        print('此url %s 已经存在！' % url)
+                    if url in self.urls or self.lagou_db.isexist_url(url):
+                        self.logger.debug('此url %s 已经存在！' % url)
                         continue
+                    self.urls.append(url)
                     item['url'] = url
                     item['publish_date'] = publish_date
                     item['position_name'] = position['positionName']
@@ -110,9 +114,10 @@ class RealTime(LagouBase):
 
     # 获取详情页的数据
     def get_position_detail(self, response, position):
+        self.request_count += 1
         if response:
             html = etree.HTML(response.content)
-            print(html.xpath('//title/text()')[0] if html.xpath('//title/text()') else 'title error ')
+            self.logger.info(html.xpath('//title/text()')[0] if html.xpath('//title/text()') else 'title error ')
             job_detail = html.xpath("//dd[@class='job_bt']/div//text()")
             job_detail = [item.strip() for item in job_detail if item.strip()]
             job_detail = '\n'.join(job_detail).strip()
@@ -123,21 +128,24 @@ class RealTime(LagouBase):
 
             position['job_detail'] = job_detail
             position['job_address'] = job_address
-
+        else:
+            self.except_count += 1
         self.save_infos(position)
 
     # 过滤url和时间
-    @staticmethod
-    def filter_url(position_data, url):
+    def filter_url(self, position_data, url):
         """
          过滤url和时间
         :param position_data:
         :param url:
         :return:
         """
-        if not handle.compare_datetime(position_data) or db_operate.isexist_url(url):
+        if not handle.compare_datetime(position_data) or \
+                self.lagou_db.isexist_url(url) or \
+                url in self.urls:
             return False
         else:
+            self.urls.append(url)
             return True
 
 
@@ -146,4 +154,11 @@ if __name__ == '__main__':
     #     save_infos().next()
 
     # print(filter_url('2018-1-4','https://www.lagou.com/jobs/356274.html'))
-    RealTime().start_spider()
+    start_time = time.time()
+    t = RealTime()
+    t.start_spider()
+    print(t.count)
+    end_time = time.time()
+    run_time = end_time - start_time
+    print('运行: %s seconds' % (run_time))
+
