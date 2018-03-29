@@ -75,11 +75,11 @@ class LagouBase(object):
 		"""获取不同职位类别的列表页"""
 		pass
 
-	def get_positions_urls(self, response, item, cookies):
+	def get_positions_urls(self, url, item, cookies=None):
 		"""获取列表页的urls"""
 		pass
 
-	def get_position_detail(self, response, position):
+	def get_position_detail(self, url, position, cookies=None):
 		"""获取详情页的数据"""
 		pass
 
@@ -108,7 +108,10 @@ class LagouBase(object):
 		# if self.lagou_db.isexist_url(data['url']):
 		# 	self.logger.debug('此url %s 已经存在！' % data['url'])
 		# 	return
-
+		# from lagou_spider import util
+		# data['publish_date'] = str(data['publish_date'])
+		# util.handle.print_log(data['url'],data)
+		# return
 		t = self.lagou_db.insert_position(data)
 		# print('+++++++++%s++++++'%data)
 		if not t:

@@ -4,6 +4,8 @@
 import uuid
 import time
 import re
+import json
+
 from datetime import datetime
 from datetime import date
 
@@ -72,6 +74,11 @@ def getNoHtmlBody(content):
     except Exception as ex:
         print (ex)
     return body
+
+def print_log(info, data):
+    str = '========%s=======\n' % info
+    str += json.dumps(data, ensure_ascii=False, indent=2)
+    print(str)
 
 def test():
     # print get_datetime('1509171516')

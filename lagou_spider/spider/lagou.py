@@ -7,6 +7,8 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 import datetime
+import gevent
+import copy
 
 from lxml import etree
 from lagou_spider.util import request
@@ -28,29 +30,33 @@ class AllLagou(LagouBase):
     def get_positons_list(self, url, item, cookies):
         response = request.get(url, cookies=cookies)
         self.request_count += 1
-        cookies = response.cookies
         if response:
+            cookies = response.cookies
             html = etree.HTML(response.content)
             title = html.xpath('//title/text()')
             if not title or title[0] == '找工作-互联网招聘求职网-拉勾网':
                 self.logger.error(url + '  error ')
                 return
-            self.get_positions_urls(response, item, cookies)
+            # self.get_positions_urls(response, item, cookies=cookies)
             html = etree.HTML(response.content)
             page_num = html.xpath("//span[@class='span totalNum']/text()")
             page_num = int(page_num[0]) if page_num else 1
-            if page_num > 1:
-                for num in range(2, page_num + 1):
+            if page_num > 0:
+                for num in range(1, page_num + 1):
                     list_url = '%s%d/' % (url, num)
-                    response = request.get(list_url, cookies=cookies)
-                    self.get_positions_urls(response, item, response.cookies)
+                    g = gevent.spawn(self.get_positions_urls,list_url, item, cookies=cookies)
+                    self.pool.add(g)
+                    # self.get_positions_urls(list_url, item, cookies=cookies)
         else:
             self.except_count += 1
 
     # 获取列表页的urls
-    def get_positions_urls(self, response, item, cookies):
+    def get_positions_urls(self, list_url, item, cookies=None):
+        item = copy.deepcopy(item)
+        response = request.get(list_url, cookies=cookies)
         self.request_count += 1
         if response:
+            cookies = response.cookies
             html = etree.HTML(response.content)
             self.logger.info(html.xpath('//title/text()')[0] if html.xpath('//title/text()') else 'title error')
             item_list = html.xpath("//ul[@class='item_con_list']/li")
@@ -75,15 +81,18 @@ class AllLagou(LagouBase):
                     item['city'] = city
                     item['company_name'] = company_name
                     item['url'] = url
-                    response = request.get(url, cookies=cookies)
-                    self.get_position_detail(response, item)
+                    g = gevent.spawn(self.get_position_detail, url, item, cookies=cookies)
+                    self.pool.add(g)
+                    # self.get_position_detail(url, item, cookies=cookies)
                 else:
                     self.logger.debug('此url %s 已经存在！' % url)
         else:
             self.except_count += 1
 
     # 获取详情页的数据
-    def get_position_detail(self, response, position):
+    def get_position_detail(self, url, position, cookies=None):
+        position = copy.deepcopy(position)
+        response = request.get(url, cookies=cookies)
         self.request_count += 1
         if response:
             html = etree.HTML(response.content)

@@ -8,6 +8,8 @@ sys.setdefaultencoding("utf-8")
 
 import time
 import random
+import gevent
+import copy
 
 from lxml import etree
 from lagou_spider.util import request
@@ -37,7 +39,9 @@ class RealTime(LagouBase):
         self.request_count += 1
         response = request.get(url, cookies=cookies)
         cookies = response.cookies
-        self.get_new_list(response, item, cookies)
+        g = gevent.spawn(self.get_new_list, response, item, cookies)
+        self.pool.add(g)
+        # self.get_new_list(response, item, cookies)
 
     # 获取最新的职位列表
     def get_new_list(self, response, item, cookies):
@@ -81,6 +85,7 @@ class RealTime(LagouBase):
 
     # 获取列表页的urls
     def get_positions_urls(self, result, item, cookies):
+        item = copy.deepcopy(item)
         content = result.get('content')
         if content:
             if content.get('positionResult'):
@@ -108,13 +113,16 @@ class RealTime(LagouBase):
                     item['company_name'] = position['companyShortName']
                     item['job_detail'] = ''
                     item['job_address'] = ''
-                    response = request.get(url=url, cookies=cookies)
-                    self.get_position_detail(response, item)
+                    g = gevent.spawn(self.get_position_detail, url, item, cookies=cookies)
+                    self.pool.add(g)
+                    # self.get_position_detail(url, item, cookies=cookies)
 
         return True
 
     # 获取详情页的数据
-    def get_position_detail(self, response, position):
+    def get_position_detail(self, url, position, cookies=None):
+        position = copy.deepcopy(position)
+        response = request.get(url=url, cookies=cookies)
         self.request_count += 1
         if response:
             html = etree.HTML(response.content)
