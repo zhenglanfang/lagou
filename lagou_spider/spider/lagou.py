@@ -3,8 +3,11 @@
 
 import sys
 sys.path.append('/Users/mrs/Desktop/project/mytest/lagou')
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 import datetime
+
 from lxml import etree
 from lagou_spider.util import request
 from lagou_spider.spider.base import LagouBase
@@ -115,6 +118,7 @@ class AllLagou(LagouBase):
         :param publish_date:
         :return:
         """
+        # print(type(publish_date))
         if publish_date.endswith('发布'):
             today = datetime.date.today()
             if publish_date.find(':') == -1:

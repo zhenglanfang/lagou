@@ -1,7 +1,9 @@
 #! /usr/bin/python
 # coding=utf-8
 
-# import sys
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 # sys.path.append('/Users/mrs/Desktop/project/mytest/lagou/lagou_spider')
 
 import gevent
@@ -34,6 +36,7 @@ class LagouBase(object):
 		self.logger = log.logger
 		self.count = 0
 		self.email_server = send_email.SendEmail(from_name=config.from_name)
+		self.pool = Pool(100)
 
 	def start_spider(self):
 		"""
@@ -52,7 +55,6 @@ class LagouBase(object):
 			menu = html.xpath("//div[@class='menu_sub dn']")[0]
 			positions_dict = {}
 			types = menu.xpath("dl")
-			pool = Pool(10)
 			for item in types:
 				type_name = item.xpath("dt/span/text()")[0]
 				# print(type_name)
@@ -65,8 +67,8 @@ class LagouBase(object):
 					position_data = {'first_type': position_name, 'second_type': type_name}
 					# self.get_positons_list(position_url, position_data, cookies)
 					g = gevent.spawn(self.get_positons_list,*(position_url, position_data, cookies))
-					pool.add(g)
-			pool.join()
+					self.pool.add(g)
+			self.pool.join()
 		self.send_email(start_time)
 
 	def get_positons_list(self, url, item, cookies):
@@ -117,7 +119,7 @@ class LagouBase(object):
 		"""发送邮件"""
 		end_time = time.time()
 		run_time = (end_time - start_time)/60
-		text = '%s \n运行: %.3f minutes，共添加条 %s 数据' % (handle.get_datetime(start_time), run_time, self.count)
+		text = '%s \n运行: %.3f minutes，共添加 %s 条数据' % (handle.get_datetime(start_time), run_time, self.count)
 		text += '\nrequest_count:%d, except_count:%d' % (self.request_count, self.except_count)
 		except_rate = float(self.except_count) / self.request_count * 100
 		self.logger.info(text)

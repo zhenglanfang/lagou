@@ -2,7 +2,7 @@
 # coding=utf-8
 
 import uuid
-import dbmysql
+from lagou_spider.database import dbmysql
 
 
 class LagouDatebase(dbmysql.DB):

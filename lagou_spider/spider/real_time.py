@@ -2,8 +2,9 @@
 # coding=utf-8
 
 import sys
-
 sys.path.append('/Users/mrs/Desktop/project/mytest/lagou/lagou_spider')
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 import time
 import random
@@ -11,7 +12,7 @@ import random
 from lxml import etree
 from lagou_spider.util import request
 from lagou_spider.util import handle
-from base import LagouBase
+from lagou_spider.spider.base import LagouBase
 
 # form_data = {
 #     'first':'false',
