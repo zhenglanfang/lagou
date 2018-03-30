@@ -3,8 +3,8 @@
 
 import sys
 sys.path.append('/Users/mrs/Desktop/project/mytest/lagou')
-reload(sys)
-sys.setdefaultencoding("utf-8")
+# reload(sys)
+# sys.setdefaultencoding("utf-8")
 
 import datetime
 import gevent
@@ -73,14 +73,14 @@ class AllLagou(LagouBase):
                     add = position.xpath(".//span[@class='add']/em/text()")[0]
                     city = add.split('·')[0]
                     company_name = position.xpath("@data-company")[0]
-                    item['position_name'] = position_name
+                    item['position_name'] = position_name.strip()
                     item['publish_date'] = publish_date
-                    item['salary'] = salary
-                    item['education'] = other.split('/')[1]
-                    item['work_year'] = other.split('/')[0][2:]
-                    item['city'] = city
-                    item['company_name'] = company_name
-                    item['url'] = url
+                    item['salary'] = salary.strip()
+                    item['education'] = other.split('/')[1].strip()
+                    item['work_year'] = other.split('/')[0][2:].strip()
+                    item['city'] = city.strip()
+                    item['company_name'] = company_name.strip()
+                    item['url'] = url.strip()
                     g = gevent.spawn(self.get_position_detail, url, item, cookies=cookies)
                     self.pool.add(g)
                     # self.get_position_detail(url, item, cookies=cookies)
@@ -102,7 +102,7 @@ class AllLagou(LagouBase):
             job_nature = html.xpath("//dd[@class='job_request']/p[1]/span[5]/text()")
             # education = str(education[0]).strip('/') if education else ''
             # work_year = str(work_year[0]).strip('/') if work_year else ''
-            job_nature = job_nature[0] if job_nature else ''
+            job_nature = job_nature[0].strip() if job_nature else ''
             job_detail = html.xpath("//dd[@class='job_bt']/div//text()")
             job_detail = [item.strip() for item in job_detail if item.strip()]
             job_detail = '\n'.join(job_detail).strip()
@@ -110,7 +110,7 @@ class AllLagou(LagouBase):
             job_address = [item.strip() for item in job_address]
             job_address = ''.join(job_address[:-2])
             district = html.xpath("//div[@class='work_addr']/a[2]/text()")
-            district = district[0] if district else ''
+            district = district[0].strip() if district else ''
             position['job_nature'] = job_nature
             position['job_detail'] = job_detail
             position['job_address'] = job_address

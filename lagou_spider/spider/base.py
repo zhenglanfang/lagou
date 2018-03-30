@@ -2,8 +2,8 @@
 # coding=utf-8
 
 import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
+# reload(sys)
+# sys.setdefaultencoding("utf-8")
 # sys.path.append('/Users/mrs/Desktop/project/mytest/lagou/lagou_spider')
 
 import gevent
@@ -104,7 +104,7 @@ class LagouBase(object):
 		"""
 		作用：保存数据
 		"""
-		# # 插入前判断url是否存在
+		# 插入前判断url是否存在
 		# if self.lagou_db.isexist_url(data['url']):
 		# 	self.logger.debug('此url %s 已经存在！' % data['url'])
 		# 	return

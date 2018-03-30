@@ -2,9 +2,9 @@
 # coding=utf-8
 
 import sys
-sys.path.append('/Users/mrs/Desktop/project/mytest/lagou/lagou_spider')
-reload(sys)
-sys.setdefaultencoding("utf-8")
+sys.path.append('/Users/mrs/Desktop/project/mytest/lagou')
+# reload(sys)
+# sys.setdefaultencoding("utf-8")
 
 import time
 import random
@@ -39,12 +39,11 @@ class RealTime(LagouBase):
         self.request_count += 1
         response = request.get(url, cookies=cookies)
         cookies = response.cookies
-        g = gevent.spawn(self.get_new_list, response, item, cookies)
-        self.pool.add(g)
-        # self.get_new_list(response, item, cookies)
+        self.get_new_list(response, item, cookies)
 
     # 获取最新的职位列表
     def get_new_list(self, response, item, cookies):
+        item = copy.deepcopy(item)
         self.request_count += 1
         if response:
             # new_url = html.xpath("//div[@class='item order']/a[2]/@href")
@@ -56,32 +55,62 @@ class RealTime(LagouBase):
                 page_num = html.xpath("//span[@class='span totalNum']/text()")
                 page_num = int(page_num[0]) if page_num else 1
                 for num in range(1, page_num + 1):
-                    form_data = {
-                        'first': 'false',
-                        'pn': str(num),
-                        'kd': item['first_type'],
-                    }
-                    headers = {
-                        'Referer': referer,
-                    }
-                    # 如果请求失败，重新请求
-                    for i in range(5):
-                        time.sleep(random.randint(1, 3))
-                        response = request.post(url=self.post_url, data=form_data, headers=headers, cookies=cookies)
-                        try:
-                            result = response.json(encoding='utf-8')
-                        except Exception as e:
-                            self.logger.error(e.message)
-                        else:
-                            if result.get('success'):
-                                result = self.get_positions_urls(result, item, cookies=response.cookies)
-                                if not result:
-                                    return
-                                break
-                            else:
-                                self.logger.error('%s %s %s' % (self.post_url, form_data, response.text))
+                    g = gevent.spawn(self.get_positions_list, num, item, referer, cookies)
+                    self.pool.add(g)
+                    # self.get_positions_list(num, item, referer, cookies)
+                    # form_data = {
+                    #     'first': 'false',
+                    #     'pn': str(num),
+                    #     'kd': item['first_type'],
+                    # }
+                    # headers = {
+                    #     'Referer': referer,
+                    # }
+                    # # 如果请求失败，重新请求
+                    # for i in range(5):
+                    #     time.sleep(random.randint(1, 3))
+                    #     response = request.post(url=self.post_url, data=form_data, headers=headers, cookies=cookies)
+                    #     try:
+                    #         result = response.json(encoding='utf-8')
+                    #     except Exception as e:
+                    #         self.logger.error(e.message)
+                    #     else:
+                    #         if result.get('success'):
+                    #             result = self.get_positions_urls(result, item, cookies=response.cookies)
+                    #             if not result:
+                    #                 return
+                    #             break
+                    #         else:
+                    #             self.logger.error('%s %s %s' % (self.post_url, form_data, response.text))
             else:
                 self.except_count += 1
+
+    def get_positions_list(self, num, item, referer, cookies):
+        item = copy.deepcopy(item)
+        form_data = {
+            'first': 'false',
+            'pn': str(num),
+            'kd': item['first_type'],
+        }
+        headers = {
+            'Referer': referer,
+        }
+        # 如果请求失败，重新请求
+        for i in range(5):
+            time.sleep(random.randint(1, 3))
+            response = request.post(url=self.post_url, data=form_data, headers=headers, cookies=cookies)
+            try:
+                result = response.json(encoding='utf-8')
+            except Exception as e:
+                self.logger.error(e.message)
+            else:
+                if result.get('success'):
+                    result = self.get_positions_urls(result, item, cookies=response.cookies)
+                    if not result:
+                        return
+                    break
+                else:
+                    self.logger.error('%s %s %s' % (self.post_url, form_data, response.text))
 
     # 获取列表页的urls
     def get_positions_urls(self, result, item, cookies):
@@ -103,14 +132,14 @@ class RealTime(LagouBase):
                     self.urls.append(url)
                     item['url'] = url
                     item['publish_date'] = publish_date
-                    item['position_name'] = position['positionName']
-                    item['work_year'] = position['workYear']
+                    item['position_name'] = position['positionName'].strip()
+                    item['work_year'] = position['workYear'].strip()
                     item['education'] = position['education'].strip()
-                    item['job_nature'] = position['jobNature']
-                    item['salary'] = position['salary']
-                    item['city'] = position['city']
-                    item['district'] = position['district'] if position['district'] else ''
-                    item['company_name'] = position['companyShortName']
+                    item['job_nature'] = position['jobNature'].strip()
+                    item['salary'] = position['salary'].strip()
+                    item['city'] = position['city'].strip()
+                    item['district'] = position['district'].strip() if position['district'] else ''
+                    item['company_name'] = position['companyShortName'].strip()
                     item['job_detail'] = ''
                     item['job_address'] = ''
                     g = gevent.spawn(self.get_position_detail, url, item, cookies=cookies)
