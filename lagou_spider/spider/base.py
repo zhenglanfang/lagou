@@ -112,7 +112,7 @@ class LagouBase(object):
 			return
 		
 		data['publish_date'] = str(data['publish_date'])
-		self.logger.info('============%s============\n%s' % (data['url'],json.dumps(data,ensure_ascii=False,indent=2)))
+		self.logger.info('===%s===\n%s' % (data['url'],json.dumps(data,ensure_ascii=False,indent=2)))
 		t = self.lagou_db.insert_position(data)
 		# print('+++++++++%s++++++'%data)
 		if not t:
