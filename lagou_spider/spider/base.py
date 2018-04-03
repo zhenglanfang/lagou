@@ -50,6 +50,7 @@ class LagouBase(object):
 		self.urls = []
 		start_time = time.time()
 		response = request.get(self.start_url)
+		self.request_count += 1
 		if response:
 			cookies = response.cookies
 			html = etree.HTML(response.content)
@@ -69,8 +70,9 @@ class LagouBase(object):
 					# self.get_positons_list(position_url, position_data, cookies)
 					g = gevent.spawn(self.get_positons_list,*(position_url, position_data, cookies))
 					self.pool.add(g)
-			self.pool.join()
-		print(self.request_count)
+		else:
+			self.except_count += 1
+		self.pool.join()
 		self.send_email(start_time)
 
 	def get_positons_list(self, url, item, cookies):

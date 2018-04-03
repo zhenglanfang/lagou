@@ -38,17 +38,20 @@ class RealTime(LagouBase):
     def get_positons_list(self, url, item, cookies):
         self.request_count += 1
         response = request.get(url, cookies=cookies)
-        cookies = response.cookies
+        if response:
+            cookies = response.cookies
+        else:
+            self.except_count += 1
         self.get_new_list(response, item, cookies)
 
     # 获取最新的职位列表
     def get_new_list(self, response, item, cookies):
         item = copy.deepcopy(item)
-        self.request_count += 1
         if response:
             # new_url = html.xpath("//div[@class='item order']/a[2]/@href")
             new_url = self.second_url % (item['first_type'])
             response = request.get(url=new_url, cookies=cookies)
+            self.request_count += 1
             if response:
                 referer = response.url
                 html = etree.HTML(response.content)
@@ -99,9 +102,11 @@ class RealTime(LagouBase):
         for i in range(5):
             time.sleep(random.randint(1, 3))
             response = request.post(url=self.post_url, data=form_data, headers=headers, cookies=cookies)
+            self.request_count += 1
             try:
                 result = response.json(encoding='utf-8')
             except Exception as e:
+                self.except_count += 1
                 self.logger.error(e.message)
             else:
                 if result.get('success'):
