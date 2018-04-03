@@ -14,7 +14,6 @@ from lxml import etree
 from lagou_spider.util import request
 from lagou_spider.spider.base import LagouBase
 
-start_url = 'https://www.lagou.com/'
 second_url = 'https://www.lagou.com/jobs/list_%s?px=default&city=全国#order'
 
 

@@ -8,6 +8,7 @@ import sys
 
 import gevent
 import time
+import json
 
 from gevent import monkey
 from gevent.pool import Pool
@@ -69,6 +70,7 @@ class LagouBase(object):
 					g = gevent.spawn(self.get_positons_list,*(position_url, position_data, cookies))
 					self.pool.add(g)
 			self.pool.join()
+		print(self.request_count)
 		self.send_email(start_time)
 
 	def get_positons_list(self, url, item, cookies):
@@ -105,13 +107,12 @@ class LagouBase(object):
 		作用：保存数据
 		"""
 		# 插入前判断url是否存在
-		# if self.lagou_db.isexist_url(data['url']):
-		# 	self.logger.debug('此url %s 已经存在！' % data['url'])
-		# 	return
-		# from lagou_spider import util
-		# data['publish_date'] = str(data['publish_date'])
-		# util.handle.print_log(data['url'],data)
-		# return
+		if self.lagou_db.isexist_url(data['url']):
+			self.logger.debug('此url %s 已经存在！' % data['url'])
+			return
+		
+		data['publish_date'] = str(data['publish_date'])
+		self.logger.info('============%s============\n%s' % (data['url'],json.dumps(data,ensure_ascii=False,indent=2)))
 		t = self.lagou_db.insert_position(data)
 		# print('+++++++++%s++++++'%data)
 		if not t:
