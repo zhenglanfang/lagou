@@ -2,6 +2,9 @@
 # coding=utf-8
 
 import sys
+import os
+dir_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(os.path.dirname(dir_path)))
 # reload(sys)
 # sys.setdefaultencoding("utf-8")
 # sys.path.append('/Users/mrs/Desktop/project/mytest/lagou/lagou_spider')
@@ -138,4 +141,7 @@ class LagouBase(object):
 					% (except_rate, self.except_count, self.request_count)
 		else:
 			subject = '拉钩网-日常数据-爬取信息'
-		self.email_server.send_email_text(to_addrs=config.to_addrs, msg=text, subject_test=subject)
+		result = self.email_server.send_email_text(to_addrs=config.to_addrs, msg=text, subject_test=subject)
+		if not result == {}:
+			self.logger.error('发送邮件失败:%s' % result)
+			

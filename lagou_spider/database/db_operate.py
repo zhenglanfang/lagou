@@ -1,6 +1,12 @@
 #! /usr/bin/python
 # coding=utf-8
 
+import sys
+import os
+dir_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(os.path.dirname(dir_path)))
+
+
 import uuid
 from lagou_spider.database import dbmysql
 
@@ -106,7 +112,7 @@ def test():
         'url':'https://www.lagou.com/jobs/3995898.html',                 
     }
     # print insert_position(params)
-    print(lagou_db.update_position(params))
+    #print(lagou_db.update_position(params))
     # print insert_position(params).rowcount
     # print insert_position(params).returns_rows
     #print insert_url('www.baidu.com')

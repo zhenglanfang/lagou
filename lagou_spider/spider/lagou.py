@@ -2,7 +2,9 @@
 # coding=utf-8
 
 import sys
-sys.path.append('/Users/mrs/Desktop/project/mytest/lagou')
+import os
+dir_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(os.path.dirname(dir_path)))
 # reload(sys)
 # sys.setdefaultencoding("utf-8")
 

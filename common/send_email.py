@@ -19,9 +19,9 @@ class SendEmail(object):
     # smtp_server = 'smtp.qq.com'
 
     # 126账号和口令
-    from_addr = 'zlf13849182150@126.com'
-    password = 'zlf123'
-    smtp_server = 'smtp.126.com'
+    from_addr = '13849182150@163.com'
+    password = 'lanfang123'
+    smtp_server = 'smtp.163.com'
 
     server = None
 
@@ -50,7 +50,8 @@ class SendEmail(object):
         :param to_users: [(name,addr),(name,addr)]
         :param msg_obj: 发送msg的对象
         :param subject_test: 发送的主题
-        :return: {},{addr:(code,info),...},except_info:str
+        :return: 发送成功 ：{},
+                 发送失败：{addr:(code,info),...},except_info:str
         """
         msg_obj['From'] = ','.join(self._format_addr([(self.from_name,self.from_addr)]))
         msg_obj['To'] = ','.join(self._format_addr(to_users))
@@ -61,7 +62,7 @@ class SendEmail(object):
             server.login(self.from_addr, self.password)
             # 发件账户，收件账户，内容
             result = server.sendmail(self.from_addr, to_addrs, msg_obj.as_string())
-            server.quit()
+            #print(result)
             return result
         except smtplib.SMTPRecipientsRefused as e:
             print(e)
@@ -69,6 +70,8 @@ class SendEmail(object):
         except smtplib.SMTPException as e:
             print('Send Fail,%s' % e)
             return str(e)
+        finally:
+            server.quit()
 
     def send_email_text(self, to_addrs, msg, subject_test='来自SMTP的问候'):
         """

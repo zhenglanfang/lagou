@@ -1,7 +1,10 @@
 #! /usr/bin/python
 # coding=utf-8
 import sys
-sys.path.append('/Users/mrs/Desktop/project/mytest/lagou')
+import os
+dir_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(os.path.dirname(dir_path)))
+
 from lagou_spider import config
 from lagou_spider.util import log
 from sqlalchemy import create_engine
