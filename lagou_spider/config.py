@@ -5,7 +5,7 @@ import os
 import logging
 
 # mysql 数据库
-MYSQL_PROD = "mysql+pymysql://root:root@47.100.115.167:3306/lagou?charset=utf8"
+MYSQL_PROD = "mysql+pymysql://root:root@127.0.0.1:3306/lagou?charset=utf8"
 
 # 日志
 log_level = logging.INFO
