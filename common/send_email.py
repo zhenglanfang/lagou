@@ -66,7 +66,7 @@ class SendEmail(object):
             return result
         except smtplib.SMTPRecipientsRefused as e:
             print(e)
-            return json.loads(json.dumps(e.message))
+            return json.loads(json.dumps(str(e)))
         except smtplib.SMTPException as e:
             print('Send Fail,%s' % e)
             return str(e)

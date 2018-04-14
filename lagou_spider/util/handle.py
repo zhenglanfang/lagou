@@ -62,6 +62,23 @@ def compare_datetime(strtime):
     else:
         return False
 
+# 判断一个字符串日期是否是当天日期
+def compare_datetime_seconds(strtime):
+    '''
+       判断一个字符串日期是否是当天日期
+       strtime: '%Y-%m-%d %H:%M:%S' or '%Y-%m-%d'
+    '''
+    time1 = datetime.strptime(strtime, '%Y-%m-%d %H:%M:%S')
+    # time1 = date(time1.year,time1.month,time1.day)
+    now = datetime.strptime('%s 23:59:59'%date.today(),'%Y-%m-%d %H:%M:%S')
+    interval_seconds = (now - time1).total_seconds()
+    # print(interval_seconds)
+    if interval_seconds < 87300:
+        return True
+    else:
+        return False
+
+
 def getNoHtmlBody(content):
     '''
     去除html标签的方法，如果我们不想要获取到的数据中有html标签，可调用此方法进行处理
@@ -87,9 +104,9 @@ def test():
     #print get_datetime('1509368593')
     # print time.mktime(time.strptime('2017-10-28 0:0:0', '%Y-%m-%d %H:%M:%S'))
     # print compare_datetime('2017-10-29 19:12:1')
-    print(compare_datetime('2018-1-2 23:12:1'))
-    print(compare_datetime('2018-1-1'))
-    
+    # print(compare_datetime('2018-1-2 23:12:1'))
+    # print(compare_datetime('2018-1-1'))
+    compare_datetime_test('2018-4-14 23:44:10')
 
 if __name__ == '__main__':
     test()

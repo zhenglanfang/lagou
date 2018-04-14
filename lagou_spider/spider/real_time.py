@@ -78,7 +78,7 @@ class RealTime(LagouBase):
                     #     try:
                     #         result = response.json(encoding='utf-8')
                     #     except Exception as e:
-                    #         self.logger.error(e.message)
+                    #         self.logger.error(e)
                     #     else:
                     #         if result.get('success'):
                     #             result = self.get_positions_urls(result, item, cookies=response.cookies)
@@ -109,7 +109,7 @@ class RealTime(LagouBase):
                 result = response.json(encoding='utf-8')
             except Exception as e:
                 self.except_count += 1
-                self.logger.error(e.message)
+                self.logger.error(str(e))
             else:
                 if result.get('success'):
                     result = self.get_positions_urls(result, item, cookies=response.cookies)
@@ -131,7 +131,7 @@ class RealTime(LagouBase):
                     # 判断是否是当天发布
                     if not handle.compare_datetime(publish_date):
                         self.logger.info('已不是当天：%s' % position['createTime'])
-                        return False
+                        # return False
                     url = self.job_url % position['positionId']
                     if url in self.urls or self.lagou_db.isexist_url(url):
                         self.logger.debug('此url %s 已经存在！' % url)
@@ -185,7 +185,7 @@ class RealTime(LagouBase):
         :param url:
         :return:
         """
-        if not handle.compare_datetime(position_data) or \
+        if not handle.compare_datetime_seconds(position_data) or \
                 self.lagou_db.isexist_url(url) or \
                 url in self.urls:
             return False

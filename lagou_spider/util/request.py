@@ -26,8 +26,8 @@ cookies_list = [
 ]
 
 
-def get(url, session=None, params=None, headers={}, timeout=5,timeout_retry=5, **kwargs):
-    '''
+def get(url, session=None, params=None, cookies=None, headers={}, timeout=5,timeout_retry=5, **kwargs):
+    '''=
     作用：发送get请求
     :param url: 目标链接
     :param session: requests.session() 对象
@@ -43,23 +43,24 @@ def get(url, session=None, params=None, headers={}, timeout=5,timeout_retry=5, *
         log.logger.error('GetError url not exit')
         return None
     # print(str(cookies)+'before---')
-    if kwargs.get('cookies',None):
-        kwargs['cookies'] = requests.utils.dict_from_cookiejar(kwargs['cookies'])
+    if cookies:
+        request_cookies = requests.utils.dict_from_cookiejar(cookies)
         # print(str(kwargs['cookies']) + 'after---')
     else:
+        request_cookies = None
         headers['Cookie'] = cookies_list[0]
     headers['User-Agent'] = random.choice(ua_list)
     try:
         time.sleep(random.randint(1,3))
         # 如果传递了session，使用该对象发送请求,否则使用requests发送请求
         if session:
-            response = session.get(url, params=params, headers=headers, timeout=timeout,verify=False,**kwargs)
+            response = session.get(url, params=params, cookies=request_cookies, headers=headers, timeout=timeout,verify=False,**kwargs)
         else:
-            response = requests.get(url, params=params, headers=headers, timeout=timeout,verify=False,**kwargs)
+            response = requests.get(url, params=params, cookies=request_cookies, headers=headers, timeout=timeout,verify=False,**kwargs)
     except Exception as e:
-        log.logger.warning('GetExcept %s' % e.message)
+        log.logger.warning('GetExcept %s retry:%s' % (e,5 - timeout_retry))
         if timeout_retry > 0:
-            htmlCode = get(url=url,session=session,params=params,headers=headers, timeout=timeout,timeout_retry=(timeout_retry-1), **kwargs)
+            htmlCode = get(url=url,session=session,params=params,cookies=cookies,headers=headers, timeout=timeout,timeout_retry=(timeout_retry-1), **kwargs)
         else:
             htmlCode = None
     else:
@@ -76,7 +77,7 @@ def get(url, session=None, params=None, headers={}, timeout=5,timeout_retry=5, *
     return htmlCode
 
 
-def post(url, session=None,data=None,headers={}, timeout=5,timeout_retry=5,**kwargs):
+def post(url, session=None,data=None, cookies=None, headers={}, timeout=5,timeout_retry=5,**kwargs):
     '''
     作用：发送post请求
     :param url: 目标链接
@@ -91,9 +92,10 @@ def post(url, session=None,data=None,headers={}, timeout=5,timeout_retry=5,**kwa
     if not url:
         print ('PostError url not exit')
         return None
-    if kwargs.get('cookies',None):
-        kwargs['cookies'] = requests.utils.dict_from_cookiejar(kwargs['cookies'])
+    if cookies:
+        request_cookies = requests.utils.dict_from_cookiejar(cookies)
     else:
+        request_cookies = None
         headers['Cookie'] = cookies_list[0]
     headers['User-Agent'] = random.choice(ua_list)
     headers['Cookie'] = cookies_list[0]
@@ -101,13 +103,13 @@ def post(url, session=None,data=None,headers={}, timeout=5,timeout_retry=5,**kwa
         time.sleep(1)
         # 如果传递了session，使用该对象发送请求,否则使用requests发送请求
         if session:
-            response = session.post(url, data=data, headers=headers, timeout=timeout, verify=False,**kwargs)
+            response = session.post(url, data=data, cookies=request_cookies, headers=headers, timeout=timeout, verify=False,**kwargs)
         else:
-            response = requests.post(url, data=data, headers=headers, timeout=timeout, verify=False,**kwargs)
+            response = requests.post(url, data=data, cookies=request_cookies, headers=headers, timeout=timeout, verify=False,**kwargs)
     except Exception as e:
-        log.logger.warning('PostExcept %s' % e.message)
+        log.logger.warning('PostExcept %s' % e)
         if timeout_retry > 0:
-            htmlCode = post(url=url,session=session,data=data,headers=headers, timeout=timeout,timeout_retry=(timeout_retry-1), **kwargs)
+            htmlCode = post(url=url,session=session,data=data,cookies=cookies,headers=headers, timeout=timeout,timeout_retry=(timeout_retry-1), **kwargs)
         else:
             htmlCode = None
     else:

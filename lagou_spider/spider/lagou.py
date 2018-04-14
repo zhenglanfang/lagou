@@ -38,7 +38,6 @@ class AllLagou(LagouBase):
             if not title or title[0] == '找工作-互联网招聘求职网-拉勾网':
                 self.logger.error(url + '  error ')
                 return
-            # self.get_positions_urls(response, item, cookies=cookies)
             html = etree.HTML(response.content)
             page_num = html.xpath("//span[@class='span totalNum']/text()")
             page_num = int(page_num[0]) if page_num else 1
@@ -54,6 +53,7 @@ class AllLagou(LagouBase):
     # 获取列表页的urls
     def get_positions_urls(self, list_url, item, cookies=None):
         item = copy.deepcopy(item)
+        self.logger.debug(type(cookies))
         response = request.get(list_url, cookies=cookies)
         self.request_count += 1
         if response:
@@ -82,6 +82,10 @@ class AllLagou(LagouBase):
                     item['city'] = city.strip()
                     item['company_name'] = company_name.strip()
                     item['url'] = url.strip()
+                    item['job_nature'] = ''
+                    item['job_detail'] = ''
+                    item['job_address'] = ''
+                    item['district'] = ''
                     g = gevent.spawn(self.get_position_detail, url, item, cookies=cookies)
                     self.pool.add(g)
                     # self.get_position_detail(url, item, cookies=cookies)
