@@ -117,10 +117,11 @@ class LagouBase(object):
         self.logger.info('===%s===\n%s' % (data['url'],json.dumps(data,ensure_ascii=False,indent=2)))
         if not self.test_check_data(data):
             self.error_count += 1
-            with open(config.log_error_path,'aw') as f:
+            with open(config.log_error_path,'a') as f:
                 f.write(json.dumps(data,ensure_ascii=False,indent=2))
+            sys.exit()
             self.logger.error('data_error%s'%(json.dumps(data,ensure_ascii=False,indent=2)))
-        return
+        #return
         t = self.lagou_db.insert_position(data)
         # print('+++++++++%s++++++'%data)
         if not t:
@@ -134,7 +135,7 @@ class LagouBase(object):
         except Exception as e:
             city = ''
             district = ''
-        if city == '' or district == '' or \
+        if city == '' or district == '' or position['district'] == '' or \
                 (city == position['city'] and district == position['district']):
             return True
         else:

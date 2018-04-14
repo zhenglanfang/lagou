@@ -14,7 +14,7 @@ log_path = os.path.join(os.path.dirname(__file__), 'log/lagou_spider.log')
 log_error_path = os.path.join(os.path.dirname(__file__), 'log/error.log')
 
 # 调试模式
-debug = True
+debug = False
 
 # 邮件
 from_name = '拉钩网数据爬取中心'

@@ -44,11 +44,10 @@ class RealTime(LagouBase):
             cookies = response.cookies
         else:
             self.except_count += 1
-        self.get_new_list(response, item, cookies)
+        self.get_new_list(response, copy.deepcopy(item), cookies)
 
     # 获取最新的职位列表
     def get_new_list(self, response, item, cookies):
-        item = copy.deepcopy(item)
         if response:
             # new_url = html.xpath("//div[@class='item order']/a[2]/@href")
             new_url = self.second_url % (item['first_type'])
@@ -60,7 +59,7 @@ class RealTime(LagouBase):
                 page_num = html.xpath("//span[@class='span totalNum']/text()")
                 page_num = int(page_num[0]) if page_num else 1
                 for num in range(1, page_num + 1):
-                    g = gevent.spawn(self.get_positions_list, num, item, referer, cookies)
+                    g = gevent.spawn(self.get_positions_list, num, copy.deepcopy(item), referer, cookies)
                     self.pool.add(g)
                     # self.get_positions_list(num, item, referer, cookies)
                     # form_data = {
@@ -91,7 +90,6 @@ class RealTime(LagouBase):
                 self.except_count += 1
 
     def get_positions_list(self, num, item, referer, cookies):
-        item = copy.deepcopy(item)
         form_data = {
             'first': 'false',
             'pn': str(num),
@@ -121,7 +119,6 @@ class RealTime(LagouBase):
 
     # 获取列表页的urls
     def get_positions_urls(self, result, item, cookies):
-        item = copy.deepcopy(item)
         content = result.get('content')
         if content:
             if content.get('positionResult'):
@@ -131,7 +128,7 @@ class RealTime(LagouBase):
                     # 判断是否是当天发布
                     if not handle.compare_datetime(publish_date):
                         self.logger.info('已不是当天：%s' % position['createTime'])
-                        # return False
+                        return False
                     url = self.job_url % position['positionId']
                     if url in self.urls or self.lagou_db.isexist_url(url):
                         self.logger.debug('此url %s 已经存在！' % url)
@@ -149,7 +146,7 @@ class RealTime(LagouBase):
                     item['company_name'] = position['companyShortName'].strip()
                     item['job_detail'] = ''
                     item['job_address'] = ''
-                    g = gevent.spawn(self.get_position_detail, url, item, cookies=cookies)
+                    g = gevent.spawn(self.get_position_detail, url, copy.deepcopy(item), cookies=cookies)
                     self.pool.add(g)
                     # self.get_position_detail(url, item, cookies=cookies)
 
@@ -157,7 +154,6 @@ class RealTime(LagouBase):
 
     # 获取详情页的数据
     def get_position_detail(self, url, position, cookies=None):
-        position = copy.deepcopy(position)
         response = request.get(url=url, cookies=cookies)
         self.request_count += 1
         if response:

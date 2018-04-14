@@ -44,7 +44,7 @@ class AllLagou(LagouBase):
             if page_num > 0:
                 for num in range(1, page_num + 1):
                     list_url = '%s%d/' % (url, num)
-                    g = gevent.spawn(self.get_positions_urls,list_url, item, cookies=cookies)
+                    g = gevent.spawn(self.get_positions_urls,list_url, copy.deepcopy(item), cookies=cookies)
                     self.pool.add(g)
                     # self.get_positions_urls(list_url, item, cookies=cookies)
         else:
@@ -52,7 +52,6 @@ class AllLagou(LagouBase):
 
     # 获取列表页的urls
     def get_positions_urls(self, list_url, item, cookies=None):
-        item = copy.deepcopy(item)
         self.logger.debug(type(cookies))
         response = request.get(list_url, cookies=cookies)
         self.request_count += 1
@@ -86,7 +85,7 @@ class AllLagou(LagouBase):
                     item['job_detail'] = ''
                     item['job_address'] = ''
                     item['district'] = ''
-                    g = gevent.spawn(self.get_position_detail, url, item, cookies=cookies)
+                    g = gevent.spawn(self.get_position_detail, url, copy.deepcopy(item), cookies=cookies)
                     self.pool.add(g)
                     # self.get_position_detail(url, item, cookies=cookies)
                 else:
@@ -96,7 +95,7 @@ class AllLagou(LagouBase):
 
     # 获取详情页的数据
     def get_position_detail(self, url, position, cookies=None):
-        position = copy.deepcopy(position)
+        #position = copy.deepcopy(position)
         response = request.get(url, cookies=cookies)
         self.request_count += 1
         if response:
