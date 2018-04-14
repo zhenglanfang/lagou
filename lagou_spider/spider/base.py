@@ -117,6 +117,8 @@ class LagouBase(object):
         self.logger.info('===%s===\n%s' % (data['url'],json.dumps(data,ensure_ascii=False,indent=2)))
         if not self.test_check_data(data):
             self.error_count += 1
+            with open(config.log_error_path,'aw') as f:
+                f.write(json.dumps(data,ensure_ascii=False,indent=2))
             self.logger.error('data_error%s'%(json.dumps(data,ensure_ascii=False,indent=2)))
         return
         t = self.lagou_db.insert_position(data)

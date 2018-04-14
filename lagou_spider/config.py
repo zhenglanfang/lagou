@@ -11,6 +11,7 @@ MYSQL_PROD = "mysql+pymysql://root:root@47.100.115.167:3306/lagou?charset=utf8"
 log_level = logging.INFO
 log_name = 'lagou_spider'
 log_path = os.path.join(os.path.dirname(__file__), 'log/lagou_spider.log')
+log_error_path = os.path.join(os.path.dirname(__file__), 'log/error.log')
 
 # 调试模式
 debug = True
