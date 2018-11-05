@@ -72,7 +72,7 @@ def compare_datetime_seconds(strtime):
     # time1 = date(time1.year,time1.month,time1.day)
     now = datetime.strptime('%s 23:59:59'%date.today(),'%Y-%m-%d %H:%M:%S')
     interval_seconds = (now - time1).total_seconds()
-    # print(interval_seconds)
+    print(interval_seconds)
     if interval_seconds < 87300:
         return True
     else:
@@ -106,7 +106,7 @@ def test():
     # print compare_datetime('2017-10-29 19:12:1')
     # print(compare_datetime('2018-1-2 23:12:1'))
     # print(compare_datetime('2018-1-1'))
-    compare_datetime_test('2018-4-14 23:44:10')
+    print(compare_datetime_seconds('2018-5-17 23:59:10'))
 
 if __name__ == '__main__':
     test()

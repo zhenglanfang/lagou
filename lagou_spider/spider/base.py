@@ -1,6 +1,11 @@
 #! /usr/bin/python
 # coding=utf-8
 
+import gevent
+from gevent import monkey
+from gevent.pool import Pool
+monkey.patch_all()
+
 import sys
 import os
 dir_path = os.path.dirname(os.path.abspath(__file__))
@@ -9,13 +14,9 @@ sys.path.append(os.path.dirname(os.path.dirname(dir_path)))
 # sys.setdefaultencoding("utf-8")
 # sys.path.append('/Users/mrs/Desktop/project/mytest/lagou/lagou_spider')
 
-import gevent
 import time
 import json
 
-from gevent import monkey
-from gevent.pool import Pool
-monkey.patch_all()
 
 from lxml import etree
 from lagou_spider.database import db_operate
@@ -54,6 +55,7 @@ class LagouBase(object):
         if response:
             cookies = response.cookies
             html = etree.HTML(response.content)
+            print(html.xpath("//title/text()")[0])
             menu = html.xpath("//div[@class='menu_sub dn']")[0]
             positions_dict = {}
             types = menu.xpath("dl")
@@ -119,7 +121,7 @@ class LagouBase(object):
             self.error_count += 1
             with open(config.log_error_path,'a') as f:
                 f.write(json.dumps(data,ensure_ascii=False,indent=2))
-            sys.exit()
+            #sys.exit()
             self.logger.error('data_error%s'%(json.dumps(data,ensure_ascii=False,indent=2)))
         #return
         t = self.lagou_db.insert_position(data)
@@ -132,6 +134,7 @@ class LagouBase(object):
     def test_check_data(self, position):
         try:
             city, district = position['job_address'].split('-')[0:2]
+            city = city.replace('市','')
         except Exception as e:
             city = ''
             district = ''
@@ -144,8 +147,8 @@ class LagouBase(object):
     def send_email(self, start_time):
         """发送邮件"""
         end_time = time.time()
-        run_time = (end_time - start_time)/60
-        text = '%s \n运行: %.3f minutes，共添加 %s 条数据' % (handle.get_datetime(start_time), run_time, self.count)
+        run_time = end_time - start_time
+        text = '%s \n运行: %d minutes %.2f seconds，共添加 %s 条数据' % (handle.get_datetime(start_time), run_time//60, run_time%60, self.count)
         text += '\nrequest_count:%d, except_count:%d, error_count:%d' % (
             self.request_count, self.except_count, self.error_count)
         except_rate = float(self.except_count) / self.request_count * 100

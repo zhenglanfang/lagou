@@ -15,7 +15,7 @@ def main():
 	real_lagou = real_time.RealTime()
 	# schedule.every().seconds.do(all_lagou.start_spider)
 	schedule.every().day.at('14:50').do(real_lagou.start_spider)
-	schedule.every().day.at('23:40').do(real_lagou.start_spider)
+	schedule.every().day.at('23:43').do(real_lagou.start_spider)
 	schedule.every(3).days.at('22:00').do(all_lagou.start_spider)
 	while True:
 		schedule.run_pending()
