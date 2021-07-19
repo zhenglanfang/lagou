@@ -20,7 +20,7 @@ class SendEmail(object):
 
     # 126账号和口令
     from_addr = '13849182150@163.com'
-    password = 'lanfang123'
+    password = '*****'
     smtp_server = 'smtp.163.com'
 
     server = None
